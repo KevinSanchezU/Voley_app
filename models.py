@@ -14,7 +14,7 @@ class Jugador(db.Model):
     #Relacion uno a uno
     equipo_dirigido = db.relationship('Equipo', backref='jugador')
     # Relacion muchos a muchos
-    equipo = db.relationship("Equipo", secondary = "jugador_equipo",back_populates="jugador")
+    equipos = db.relationship("Equipo", secondary = "jugador_equipo",back_populates="jugadores")
 
 class Equipo(db.Model):
     __table__ = "equipo"
@@ -26,9 +26,11 @@ class Equipo(db.Model):
     #Relacion uno a uno
     entrenador_id = db.Column(db.String(30), db.ForeignKey('jugador.dni'), nullable=True) #clave foranea de jugador
     # Relacion muchos a muchos
-    jugador = db.relationship("Jugador",secondary="jugador_equipo",back_populates="equipo")
+    jugadores = db.relationship("Jugador",secondary="jugador_equipo",back_populates="equipos")
 
-jugador_equipo = db.Table( #tabla resultante de jugador JOIN equipo
+
+#tabla resultante de jugador JOIN equipo
+jugador_equipo = db.Table( 
     "jugador_equipo",
     db.Column("jugador_dni", db.Integer, db.ForeignKey('jugador.dni'), primary_key = True),
     db.Column("equipo_nombre", db.String(25), db.ForeignKey('equipo.nombre'), primary_key = True),
