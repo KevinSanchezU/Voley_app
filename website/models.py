@@ -1,9 +1,8 @@
-from flask_sqlalchemy import SQLAlchemy
 from datetime import date
 
-db = SQLAlchemy()
+from . import db
 
-#tabla resultante de jugador JOIN equipo
+#tabla resultante de conexion jugador-equipo
 jugador_equipo = db.Table( 
     "jugador_equipo",
     db.Column("dni", db.Integer, db.ForeignKey('jugador.dni'), primary_key = True),
