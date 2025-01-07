@@ -20,7 +20,7 @@ class Jugador(db.Model):
     nya = db.Column(db.String(30), nullable=False)
     telefono = db.Column(db.String(15), nullable=True, default="0")
     fecha_nac = db.Column(db.Date, nullable=False)
-    direccion = db.Column(db.String(35),nullable=True)
+    direccion = db.Column(db.String(35),nullable=True, default="")
     #Relacion uno a uno
     equipo_dirigido = db.relationship('Equipo', backref='jugador', uselist=False)
     # Relacion muchos a muchos
@@ -30,8 +30,8 @@ class Equipo(db.Model):
     __tablename__ = "equipo"
 
     nombre = db.Column(db.String(25), primary_key=True)
-    contacto = db.Column(db.String(30),nullable=True)
-    division = db.Column(db.String(25), nullable=True)
+    contacto = db.Column(db.String(30),nullable=True, default="")
+    division = db.Column(db.String(25), nullable=True, default="")
     fecha_ingreso = db.Column(db.Date,nullable=False)
     #Relacion uno a uno
     entrenador_id = db.Column(db.String(30), db.ForeignKey('jugador.dni'), nullable=True, unique=True) #clave foranea de jugador
