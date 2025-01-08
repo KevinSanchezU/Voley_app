@@ -26,6 +26,14 @@ class Jugador(db.Model):
     # Relacion muchos a muchos
     equipos = db.relationship("Equipo", secondary="jugador_equipo",back_populates="jugadores")
 
+    def ya_existe_en_la_bd(self):
+        """ Revisa la base de datos en busca del jugador.
+         Retornos:
+         True, si el jugador existe en la bd/
+         False, si el jugador no existe en la bd """
+        return self.query.filter_by(dni=self.dni).scalar() != None
+
+        
 class Equipo(db.Model):
     __tablename__ = "equipo"
 
@@ -38,3 +46,9 @@ class Equipo(db.Model):
     # Relacion muchos a muchos
     jugadores = db.relationship("Jugador",secondary="jugador_equipo",back_populates="equipos")
 
+    def ya_existe_en_la_bd(self):
+        """ Revisa la base de datos en busca del equipo.
+         Retornos:
+         True, si el equipo existe en la bd/
+         False, si el equipo no existe en la bd """
+        return self.query.filter_by(nombre=self.nombre).scalar() != None
