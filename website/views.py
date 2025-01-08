@@ -1,5 +1,5 @@
 from flask import Blueprint, request, render_template
-from .models import Equipo, Jugador
+from .models import Equipo, Jugador, jugador_equipo
 from datetime import date
 from . import db
 
@@ -54,14 +54,44 @@ def equipos():
         if validar_division_equipo(division) and validar_nombre(nombre) and validar_fecha(fecha_ingreso):
             #agregar equipo a la bd
             nuevo_equipo = Equipo(nombre=nombre, fecha_ingreso=fecha_ingreso,contacto=contacto, division=division,entrenador_id=entrenador_id)
+            if nuevo_equipo.ya_existe_en_la_bd() == True:
+                return "Equipo ya existe en la base de datos"
             db.session.add(nuevo_equipo)
             db.session.commit()
-            return "POST REQUEST"
+            return "Equipo agregado"
         else:
             return "ERROR EN LOS PARAMETROS"
+    else:
+        return "Eliminando equipo"
 
-@views.route("/jugadores")
+@views.route("/jugadores", methods=["GET","POST"])
 def jugadores():
-    #funcion que muestra todos los jugadores
+    if request.method == "GET":
+        jugadores = Jugador.query.order_by(Jugador.dni).all()
+        if len(jugadores) > 0:
+            for jugador in jugadores:
+                print(f"Nombre del jugador: {jugador.nya}")
+                print(f"DNI del jugador: {jugador.dni}")
+                print(f"Fecha de nacimiento: {jugador.fecha_nac}")
+        else:
+            print("No hay jugadores")
+    else: #request.method == "POST"
+        #Levantando info del jugador del front
+        dni = request.form.get("dni")
+        nya = request.form.get("nya")
+        telefono = request.form.get("telefono")
+        fecha_nac = date.fromisoformat(request.form.get("fecha_nac"))
+        direccion = request.form.get("direccion")
+        #creacion de jugador
+        nuevo_jugador = Jugador(dni=dni,nya=nya,telefono=telefono,fecha_nac=fecha_nac,direccion=direccion)
+        #Ver si hay un jugador con ese dni
+        #jugador_ya_existe_en_la_bd(nuevo_jugador) == True:
+        if nuevo_jugador.ya_existe_en_la_bd() == True:
+            return "Jugador ya existe en la base de datos"
+        #Agregar jugador a la bd
+        db.session.add(nuevo_jugador)
+        db.session.commit()
+            
+        return "Jugador agregado"
     #Jugador.query.all()
     return "<h1>Todos los jugadores!</h1>"
