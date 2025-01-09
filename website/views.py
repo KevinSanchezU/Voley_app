@@ -50,6 +50,7 @@ def equipos():
         division = request.form.get("division")
         fecha_ingreso = date.fromisoformat(request.form.get("fecha_ingreso")) #convertir string en un objeto date
         entrenador_id = request.form.get("entrenador")
+
         #Validar valores
         if validar_division_equipo(division) and validar_nombre(nombre) and validar_fecha(fecha_ingreso):
             #agregar equipo a la bd
@@ -64,7 +65,7 @@ def equipos():
     else:
         return "Eliminando equipo"
 
-@views.route("/jugadores", methods=["GET","POST"])
+@views.route("/jugadores", methods=["GET","POST","PUT"])
 def jugadores():
     if request.method == "GET":
         jugadores = Jugador.query.order_by(Jugador.dni).all()
@@ -75,7 +76,9 @@ def jugadores():
                 print(f"Fecha de nacimiento: {jugador.fecha_nac}")
         else:
             print("No hay jugadores")
-    else: #request.method == "POST"
+        return "<h1>Todos los jugadores!</h1>"
+
+    elif request.method == "POST":
         #Levantando info del jugador del front
         dni = request.form.get("dni")
         nya = request.form.get("nya")
@@ -85,13 +88,25 @@ def jugadores():
         #creacion de jugador
         nuevo_jugador = Jugador(dni=dni,nya=nya,telefono=telefono,fecha_nac=fecha_nac,direccion=direccion)
         #Ver si hay un jugador con ese dni
-        #jugador_ya_existe_en_la_bd(nuevo_jugador) == True:
+        
         if nuevo_jugador.ya_existe_en_la_bd() == True:
             return "Jugador ya existe en la base de datos"
         #Agregar jugador a la bd
         db.session.add(nuevo_jugador)
         db.session.commit()
-            
+
         return "Jugador agregado"
+
+    else: #method PUT
+        dni = request.form.get("dni")
+        equipo = request.form.get("equipos")
+        jugador = Jugador.query.filter_by(dni=dni).first()
+        #consiguiendo el equipo
+        equipo = Equipo.query.get("Cabras")
+        
+        jugador.equipo_dirigido = equipo
+        #db.session.add()
+        return "Metodo PUT"
     #Jugador.query.all()
-    return "<h1>Todos los jugadores!</h1>"
+""" Para llenar los atributos relationship en Models es necesario
+asignarles un objeto del tipo especificado en la relacion """
