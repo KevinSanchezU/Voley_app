@@ -36,6 +36,7 @@ def equipos():
         equipos = Equipo.query.order_by(Equipo.nombre).all()
         if len(equipos) > 0:
             for equipo in equipos:
+                print(f"Id del equipo: {equipo.id}")
                 print(f"Nombre de equipo: {equipo.nombre}")
                 print(f"Fecha de ingreso: {equipo.fecha_ingreso}")
                 print(f"DNI de entrenador: {equipo.entrenador_id}")
@@ -74,6 +75,9 @@ def jugadores():
                 print(f"Nombre del jugador: {jugador.nya}")
                 print(f"DNI del jugador: {jugador.dni}")
                 print(f"Fecha de nacimiento: {jugador.fecha_nac}")
+                print(f"Juega en: {jugador.equipos}")
+                print(f"Entrenador en: {jugador.equipo_dirigido}")
+
         else:
             print("No hay jugadores")
         return "<h1>Todos los jugadores!</h1>"
@@ -97,15 +101,25 @@ def jugadores():
 
         return "Jugador agregado"
 
-    else: #method PUT
+    else: #method PUT, agregando equipos dirigidos y a que equipo pertenece
         dni = request.form.get("dni")
-        equipo = request.form.get("equipos")
+        equipo_dirigido_form = request.form.get("equipo_dirigido")
+        equipo_donde_juega_form = request.form.get("equipo")
         jugador = Jugador.query.filter_by(dni=dni).first()
-        #consiguiendo el equipo
-        equipo = Equipo.query.get("Cabras")
         
-        jugador.equipo_dirigido = equipo
-        #db.session.add()
+        #consiguiendo el equipo dirigido
+        equipo_dirigido = Equipo.query.get(equipo_dirigido_form)
+        #consiguiendo el equipo donde juega
+        equipo = Equipo.query.get(equipo_donde_juega_form)
+        
+        if equipo_dirigido.nombre == equipo.nombre:
+            print("No podes dirigir y jugar en el mismo equipo")
+        if equipo_dirigido is not None:
+            jugador.equipo_dirigido = equipo_dirigido
+        if equipo is not None:
+            jugador.equipos.append(equipo)
+        #db.session.commit()
+
         return "Metodo PUT"
     #Jugador.query.all()
 """ Para llenar los atributos relationship en Models es necesario
