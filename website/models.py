@@ -6,7 +6,7 @@ from . import db
 class JugadorEquipo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     dni_jugador = db.Column("jugador.dni",db.Integer, db.ForeignKey("jugador.dni"), primary_key=True)
-    id_equipo = db.Column("equipo.dni",db.Integer, db.ForeignKey("equipo.dni"), primary_key=True)
+    id_equipo = db.Column("equipo.id",db.Integer, db.ForeignKey("equipo.id"), primary_key=True)
     categoria = db.Column(db.Enum('Sub-18', 'Sub-21' 'Mayores segunda', 'Mayores primera', name='categoria_enum', create_type=False),nullable=False)
 
     nro_camiseta = db.Column(db.Integer,nullable=False)
@@ -47,14 +47,14 @@ class Equipo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(45))
     contacto = db.Column(db.String(60),nullable=True, default="")
-    division = db.Column(db.Enum('M','F', name="sexo_enum", create_type=False), nullable=False)
+    division = db.Column(db.Enum('M','F', name="division_enum", create_type=False), nullable=False)
     fecha_ingreso = db.Column(db.Date,nullable=False)
     #Relacion uno a uno
     entrenador_id = db.Column(db.Integer, db.ForeignKey('jugador.dni'), nullable=True, unique=True) #clave foranea de jugador
     # Relacion muchos a muchos
     jugadores = db.relationship("JugadorEquipo", back_populates="equipo")
     
-    __table_args_ = (db.UniqueConstraint("nombre","division", name="unique_nombre_division"))
+    __table_args__ = (db.UniqueConstraint("nombre","division", name="unique_nombre_division"),)
 
     def __repr__(self):
         return f"{self.nombre}"

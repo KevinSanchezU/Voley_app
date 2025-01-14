@@ -1,5 +1,6 @@
-from flask import Blueprint, request, render_template
-from .models import Equipo, Jugador, jugador_equipo
+from flask import Blueprint, request, render_template, jsonify
+from sqlalchemy import exc
+from .models import Equipo, Jugador, JugadorEquipo
 from datetime import date
 from . import db
 
@@ -7,7 +8,7 @@ from . import db
 views = Blueprint("views", __name__)
 
 def validar_division_equipo(division):
-    if division not in ["Sub-18", "Sub-21", "Mayores", ""]:
+    if division not in ["M","F"]:
         return False
     return True
 
@@ -39,11 +40,19 @@ def equipos():
                 print(f"Id del equipo: {equipo.id}")
                 print(f"Nombre de equipo: {equipo.nombre}")
                 print(f"Fecha de ingreso: {equipo.fecha_ingreso}")
+                print(f"Division: {equipo.division}")
                 print(f"DNI de entrenador: {equipo.entrenador_id}")
-                # A pesar de agregar un entrenador, este no aparece => entrenador_id es una clave foranea
         else:
-            print("No hay equipos")
-        return "<h1>Todos los equipos!</h1>"
+            return jsonify({"Mensaje":"No hay equipos"})
+        ## REVISANDO LA CLASE JUGADOREQUIPO
+        jugador_equipo = JugadorEquipo.query.order_by(JugadorEquipo.id).all()
+        if len(jugador_equipo) > 0:
+            for asociacion in jugador_equipo:
+                print(asociacion)
+        else:
+            print("No nay asociacion")
+
+        return jsonify({"Mensaje":"201"})
     elif request.method == "POST":
         #Levantar valores del front
         nombre = request.form.get("nombre")
@@ -55,12 +64,16 @@ def equipos():
         #Validar valores
         if validar_division_equipo(division) and validar_nombre(nombre) and validar_fecha(fecha_ingreso):
             #agregar equipo a la bd
+            if entrenador_id is not None:
+                print("buscando entrenador en la bd")
             nuevo_equipo = Equipo(nombre=nombre, fecha_ingreso=fecha_ingreso,contacto=contacto, division=division,entrenador_id=entrenador_id)
-            if nuevo_equipo.ya_existe_en_la_bd() == True:
-                return "Equipo ya existe en la base de datos"
-            db.session.add(nuevo_equipo)
-            db.session.commit()
-            return "Equipo agregado"
+            try:
+                db.session.add(nuevo_equipo)
+                db.session.commit()
+            except exc.IntegrityError as e:
+                db.session.rollback()
+                return f"Error: {e}"
+            return jsonify({"Mensaje": f"Agregado {nombre} correctamente"})
         else:
             return "ERROR EN LOS PARAMETROS"
     else:
@@ -86,20 +99,20 @@ def jugadores():
         #Levantando info del jugador del front
         dni = request.form.get("dni")
         nya = request.form.get("nya")
+        sexo = request.form.get("sexo")
         telefono = request.form.get("telefono")
         fecha_nac = date.fromisoformat(request.form.get("fecha_nac"))
         direccion = request.form.get("direccion")
         #creacion de jugador
-        nuevo_jugador = Jugador(dni=dni,nya=nya,telefono=telefono,fecha_nac=fecha_nac,direccion=direccion)
-        #Ver si hay un jugador con ese dni
+        nuevo_jugador = Jugador(dni=dni,nya=nya,sexo=sexo,telefono=telefono,fecha_nac=fecha_nac,direccion=direccion)
         
-        if nuevo_jugador.ya_existe_en_la_bd() == True:
-            return "Jugador ya existe en la base de datos"
-        #Agregar jugador a la bd
-        db.session.add(nuevo_jugador)
-        db.session.commit()
-
-        return "Jugador agregado"
+        try:
+            db.session.add(nuevo_jugador)
+            db.session.commit()
+        except exc.IntegrityError as e: #Error si el jugador ya existe en la bd
+            db.session.rollback()
+            return f"Error: {e}"
+        return jsonify({"Mensaje": f"Agregado {nya} correctamente"})
 
     else: #method PUT, agregando equipos dirigidos y a que equipo pertenece
         dni = request.form.get("dni")
