@@ -2,30 +2,33 @@ from datetime import date
 
 from . import db
 
-#tabla resultante de conexion jugador-equipo
-jugador_equipo = db.Table( 
-    "jugador_equipo",
-    db.Column("dni_jugador", db.Integer, db.ForeignKey('jugador.dni'), primary_key = True),
-    db.Column("id_equipo", db.String(25), db.ForeignKey('equipo.id'), primary_key = True),
-    db.Column("categoria", db.Enum('Sub-18', 'Sub-21' 'Mayores', name='categoria_enum', create_type=False), primary_key=True),
-    
-    db.Column("nro_camiseta", db.Integer,nullable=False),
-    db.Column("posicion", db.String(10), nullable=False)
-)
+#clase resultante de conexion jugador-equipo
+class JugadorEquipo(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    dni_jugador = db.Column("jugador.dni",db.Integer, db.ForeignKey("jugador.dni"), primary_key=True)
+    id_equipo = db.Column("equipo.dni",db.Integer, db.ForeignKey("equipo.dni"), primary_key=True)
+    categoria = db.Column(db.Enum('Sub-18', 'Sub-21' 'Mayores segunda', 'Mayores primera', name='categoria_enum', create_type=False),nullable=False)
+
+    nro_camiseta = db.Column(db.Integer,nullable=False)
+    posicion = db.Column(db.Enum('Punta', 'Central' 'Libero', 'Armador', 'Opuesto', name='posicion_enum', create_type=False))
+
+    jugador = db.relationship("Jugador", back_populates="equipos")
+    equipo = db.relationship("Equipo", back_populates="jugadores")
+
 
 class Jugador(db.Model):
     __tablename__ = "jugador"
 
     dni = db.Column(db.Integer, primary_key=True)
-    nya = db.Column(db.String(30), nullable=False)
+    nya = db.Column(db.String(45), nullable=False)
     sexo = db.Column(db.Enum('M','F', name="sexo_enum", create_type=False), nullable=False)
     telefono = db.Column(db.String(15), nullable=True, default="0")
     fecha_nac = db.Column(db.Date, nullable=False)
-    direccion = db.Column(db.String(35),nullable=True, default="")
+    direccion = db.Column(db.String(75),nullable=True, default="")
     #Relacion uno a uno
     equipo_dirigido = db.relationship('Equipo', backref='jugador', uselist=False)
     # Relacion muchos a muchos
-    equipos = db.relationship("Equipo", secondary="jugador_equipo",back_populates="jugadores")
+    equipos = db.relationship("JugadorEquipo",back_populates="jugador")
 
     def __repr__(self):
         return f"{self.nya}"
@@ -42,19 +45,21 @@ class Equipo(db.Model):
     __tablename__ = "equipo"
 
     id = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(25))
-    contacto = db.Column(db.String(30),nullable=True, default="")
-    division = db.Column(db.String(25), nullable=True, default="")
+    nombre = db.Column(db.String(45))
+    contacto = db.Column(db.String(60),nullable=True, default="")
+    division = db.Column(db.Enum('M','F', name="sexo_enum", create_type=False), nullable=False)
     fecha_ingreso = db.Column(db.Date,nullable=False)
     #Relacion uno a uno
-    entrenador_id = db.Column(db.String(30), db.ForeignKey('jugador.dni'), nullable=True, unique=True) #clave foranea de jugador
+    entrenador_id = db.Column(db.Integer, db.ForeignKey('jugador.dni'), nullable=True, unique=True) #clave foranea de jugador
     # Relacion muchos a muchos
-    jugadores = db.relationship("Jugador",secondary="jugador_equipo",back_populates="equipos")
+    jugadores = db.relationship("JugadorEquipo", back_populates="equipo")
     
+    __table_args_ = (db.UniqueConstraint("nombre","division", name="unique_nombre_division"))
+
     def __repr__(self):
         return f"{self.nombre}"
     
-    def ya_existe_en_la_bd(self):
+    def ya_existe_en_la_bd(self): #except IntegrityError as e:
         """ Revisa la base de datos en busca del equipo.
          Retornos:
          True, si el equipo existe en la bd/
