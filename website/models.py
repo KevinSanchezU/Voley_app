@@ -4,10 +4,10 @@ from . import db
 
 #clase resultante de conexion jugador-equipo
 class JugadorEquipo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ ="jugadorequipo"
     dni_jugador = db.Column("jugador.dni",db.Integer, db.ForeignKey("jugador.dni"), primary_key=True)
     id_equipo = db.Column("equipo.id",db.Integer, db.ForeignKey("equipo.id"), primary_key=True)
-    categoria = db.Column(db.Enum('Sub-18', 'Sub-21' 'Mayores segunda', 'Mayores primera', name='categoria_enum', create_type=False),nullable=False)
+    categoria = db.Column(db.Enum('Sub-18', 'Sub-21', 'Mayores segunda', 'Mayores primera', name='categoria_enum', create_type=False),nullable=False)
 
     nro_camiseta = db.Column(db.Integer,nullable=False)
     posicion = db.Column(db.Enum('Punta', 'Central' 'Libero', 'Armador', 'Opuesto', name='posicion_enum', create_type=False))
