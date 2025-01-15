@@ -30,7 +30,7 @@ def validar_jugador(jugador):
 @views.route("/")
 def home():
     return "<h1> Bienvenido a la liga, elija si ver equipos o Jugadores</h1>"
-@views.route("/equipos", methods=["GET","POST"])
+@views.route("/equipos", methods=["GET","POST", "PUT"])
 def equipos():
     #funcion que muestra todos los equipos
     if request.method == "GET":
@@ -42,10 +42,11 @@ def equipos():
                 print(f"Fecha de ingreso: {equipo.fecha_ingreso}")
                 print(f"Division: {equipo.division}")
                 print(f"DNI de entrenador: {equipo.entrenador_id}")
+                print(f"jugadores: {equipo.jugadores}")
         else:
             return jsonify({"Mensaje":"No hay equipos"})
         ## REVISANDO LA CLASE JUGADOREQUIPO
-        jugador_equipo = JugadorEquipo.query.order_by(JugadorEquipo.id).all()
+        jugador_equipo = JugadorEquipo.query.order_by(JugadorEquipo.id_equipo).all()
         if len(jugador_equipo) > 0:
             for asociacion in jugador_equipo:
                 print(asociacion)
@@ -76,8 +77,21 @@ def equipos():
             return jsonify({"Mensaje": f"Agregado {nombre} correctamente"})
         else:
             return "ERROR EN LOS PARAMETROS"
-    else:
-        return "Eliminando equipo"
+    else: # metodo PUT
+        nombre = request.form.get("nombre")
+        dni = request.form.get("dni")
+        division = request.form.get("division")
+        jugador = Jugador.query.filter_by(dni=dni).first()
+        equipo = Equipo.query.filter_by(nombre=nombre,division=division).first()
+        asociacion = JugadorEquipo(dni_jugador=jugador.dni, id_equipo=equipo.id,categoria="Mayores segunda", nro_camiseta=12,posicion="Opuesto")
+        print(equipo.jugadores)
+        db.session.add(asociacion)
+        print(equipo.jugadores)
+        try:
+            db.session.commit()
+        except exc.IntegrityError as e:
+            return f"{e}"
+        return jsonify({"mensaje":"Equipo cambiado con exito"})
 
 @views.route("/jugadores", methods=["GET","POST","PUT"])
 def jugadores():
@@ -119,7 +133,7 @@ def jugadores():
         equipo_dirigido_form = request.form.get("equipo_dirigido")
         equipo_donde_juega_form = request.form.get("equipo")
         jugador = Jugador.query.filter_by(dni=dni).first()
-        
+        return "En construccion"
         #consiguiendo el equipo dirigido
         equipo_dirigido = Equipo.query.get(equipo_dirigido_form)
         #consiguiendo el equipo donde juega
