@@ -42,16 +42,14 @@ def equipos():
                 print(f"Fecha de ingreso: {equipo.fecha_ingreso}")
                 print(f"Division: {equipo.division}")
                 print(f"DNI de entrenador: {equipo.entrenador_id}")
-                print(f"jugadores: {equipo.jugadores}")
+                
+                for asociacionJugador in equipo.jugadores:
+                    print(f"Jugador: {asociacionJugador.jugador.nya}")
+                    print(f"Nro de camiseta: {asociacionJugador.nro_camiseta}")
+                    print(f"Posicion: {asociacionJugador.posicion}")
+                    print()
         else:
             return jsonify({"Mensaje":"No hay equipos"})
-        ## REVISANDO LA CLASE JUGADOREQUIPO
-        jugador_equipo = JugadorEquipo.query.order_by(JugadorEquipo.id_equipo).all()
-        if len(jugador_equipo) > 0:
-            for asociacion in jugador_equipo:
-                print(asociacion)
-        else:
-            print("No nay asociacion")
 
         return jsonify({"Mensaje":"201"})
     elif request.method == "POST":
@@ -81,17 +79,30 @@ def equipos():
         nombre = request.form.get("nombre")
         dni = request.form.get("dni")
         division = request.form.get("division")
+        nro_camiseta = request.form.get("nro_camiseta")
+        posicion = request.form.get("posicion")
+
         jugador = Jugador.query.filter_by(dni=dni).first()
         equipo = Equipo.query.filter_by(nombre=nombre,division=division).first()
-        asociacion = JugadorEquipo(dni_jugador=jugador.dni, id_equipo=equipo.id,categoria="Mayores segunda", nro_camiseta=12,posicion="Opuesto")
-        print(equipo.jugadores)
+        asociacion = JugadorEquipo(dni_jugador=jugador.dni, id_equipo=equipo.id,categoria="Mayores segunda", nro_camiseta=nro_camiseta,posicion=posicion)
         db.session.add(asociacion)
-        print(equipo.jugadores)
         try:
             db.session.commit()
         except exc.IntegrityError as e:
             return f"{e}"
         return jsonify({"mensaje":"Equipo cambiado con exito"})
+    
+@views.route("/eliminar_equipo/<int:id>", methods=["DELETE"])
+def eliminar_equipo(id):
+    try:
+        equipo_a_eliminar = Equipo.query.filter_by(id=id).first()
+        if equipo_a_eliminar is None:
+            return jsonify({"mensaje":"No existe equipo con ese ID"})
+        db.session.delete(equipo_a_eliminar)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({"mensaje":str(e)})
+    return jsonify({"mensaje":f"Equipo {equipo_a_eliminar.nombre} eliminado correctamente"})
 
 @views.route("/jugadores", methods=["GET","POST","PUT"])
 def jugadores():
@@ -130,24 +141,31 @@ def jugadores():
 
     else: #method PUT, agregando equipos dirigidos y a que equipo pertenece
         dni = request.form.get("dni")
-        equipo_dirigido_form = request.form.get("equipo_dirigido")
-        equipo_donde_juega_form = request.form.get("equipo")
+        equipo_a_dirigir_form = request.form.get("equipo_a_dirigir")
+        equipo_donde_juega_form = request.form.get("equipo_donde_juega")
         jugador = Jugador.query.filter_by(dni=dni).first()
-        return "En construccion"
-        #consiguiendo el equipo dirigido
-        equipo_dirigido = Equipo.query.get(equipo_dirigido_form)
-        #consiguiendo el equipo donde juega
-        equipo = Equipo.query.get(equipo_donde_juega_form)
         
-        if equipo_dirigido.nombre == equipo.nombre:
-            print("No podes dirigir y jugar en el mismo equipo")
-        if equipo_dirigido is not None:
-            jugador.equipo_dirigido = equipo_dirigido
-        if equipo is not None:
-            jugador.equipos.append(equipo)
-        #db.session.commit()
+        #consiguiendo el equipo a dirigir
+        equipo_a_dirigir = Equipo.query.get(equipo_a_dirigir_form)
+        #consiguiendo el equipo donde juega
+        equipo_donde_juega = Equipo.query.get(equipo_donde_juega_form)
+        
 
-        return "Metodo PUT"
-    #Jugador.query.all()
-""" Para llenar los atributos relationship en Models es necesario
-asignarles un objeto del tipo especificado en la relacion """
+        if equipo_donde_juega is not None and equipo_a_dirigir.nombre == equipo_donde_juega.nombre:
+            return jsonify({"mensaje":"No podes dirigir y jugar en el mismo equipo"})
+        jugador.equipo_dirigido = equipo_a_dirigir
+        db.session.commit()
+        return jsonify({"mensaje":f"Jugador {jugador.nya} se volvio entrenador de {equipo_a_dirigir.nombre}"})
+
+
+@views.route("/eliminar_jugador/<int:dni>", methods=["DELETE"])
+def eliminar_jugador(dni):
+    try:
+        jugador_a_eliminar = Jugador.query.filter_by(dni=dni).first()
+        if jugador_a_eliminar is None:
+            return jsonify({"mensaje":"No existe un jugador con ese id"}),404
+        db.session.delete(jugador_a_eliminar)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({"mensaje":str(e)}),500
+    return jsonify({"mensaje":"Jugador eliminado correctamente"})

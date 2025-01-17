@@ -5,8 +5,8 @@ from . import db
 #clase resultante de conexion jugador-equipo
 class JugadorEquipo(db.Model):
     __tablename__ ="jugadorequipo"
-    dni_jugador = db.Column("jugador.dni",db.Integer, db.ForeignKey("jugador.dni"), primary_key=True)
-    id_equipo = db.Column("equipo.id",db.Integer, db.ForeignKey("equipo.id"), primary_key=True)
+    dni_jugador = db.Column("jugador.dni",db.Integer, db.ForeignKey("jugador.dni", ondelete="CASCADE"), primary_key=True)
+    id_equipo = db.Column("equipo.id",db.Integer, db.ForeignKey("equipo.id", ondelete="CASCADE"), primary_key=True)
     categoria = db.Column(db.Enum('Sub-18', 'Sub-21', 'Mayores segunda', 'Mayores primera', name='categoria_enum', create_type=False),nullable=False)
 
     nro_camiseta = db.Column(db.Integer,nullable=False)
@@ -28,7 +28,7 @@ class Jugador(db.Model):
     #Relacion uno a uno
     equipo_dirigido = db.relationship('Equipo', backref='jugador', uselist=False)
     # Relacion muchos a muchos
-    equipos = db.relationship("JugadorEquipo",back_populates="jugador")
+    equipos = db.relationship("JugadorEquipo",back_populates="jugador", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"{self.nya}"
@@ -50,9 +50,9 @@ class Equipo(db.Model):
     division = db.Column(db.Enum('M','F', name="division_enum", create_type=False), nullable=False)
     fecha_ingreso = db.Column(db.Date,nullable=False)
     #Relacion uno a uno
-    entrenador_id = db.Column(db.Integer, db.ForeignKey('jugador.dni'), nullable=True, unique=True) #clave foranea de jugador
+    entrenador_id = db.Column(db.Integer, db.ForeignKey('jugador.dni', ondelete="SET NULL"), nullable=True, unique=True) #clave foranea de jugador
     # Relacion muchos a muchos
-    jugadores = db.relationship("JugadorEquipo", back_populates="equipo")
+    jugadores = db.relationship("JugadorEquipo", back_populates="equipo", cascade="all, delete-orphan")
     
     __table_args__ = (db.UniqueConstraint("nombre","division", name="unique_nombre_division"),)
 
