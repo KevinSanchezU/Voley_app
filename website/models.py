@@ -15,6 +15,17 @@ class JugadorEquipo(db.Model):
     jugador = db.relationship("Jugador", back_populates="equipos")
     equipo = db.relationship("Equipo", back_populates="jugadores")
 
+    def __repr__(self):
+        return f"{self.dni_jugador}, {self.id_equipo}, {self.posicion}"
+    
+    def to_json(self):
+        return {
+            "dniJugador":self.dni_jugador,
+            "idEquipo":self.id_equipo,
+            "categoria":self.categoria,
+            "nroCamiseta":self.nro_camiseta,
+            "posicion":self.posicion
+        }
 
 class Jugador(db.Model):
     __tablename__ = "jugador"
@@ -33,12 +44,17 @@ class Jugador(db.Model):
     def __repr__(self):
         return f"{self.nya}"
     
-    def ya_existe_en_la_bd(self):
-        """ Revisa la base de datos en busca del jugador.
-         Retornos:
-         True, si el jugador existe en la bd/
-         False, si el jugador no existe en la bd """
-        return self.query.filter_by(dni=self.dni).scalar() != None
+    def to_json(self):
+        return {
+            "dni":self.dni,
+            "nya":self.nya,
+            "sexo":self.sexo,
+            "telefono":self.telefono,
+            "fechaNac":self.fecha_nac,
+            "direccion":self.direccion,
+            "equipoDirigido": self.equipo_dirigido,
+            "equipos": [equipo.equipo.nombre for equipo in self.equipos]
+        }
 
         
 class Equipo(db.Model):
@@ -59,9 +75,13 @@ class Equipo(db.Model):
     def __repr__(self):
         return f"{self.nombre}"
     
-    def ya_existe_en_la_bd(self): #except IntegrityError as e:
-        """ Revisa la base de datos en busca del equipo.
-         Retornos:
-         True, si el equipo existe en la bd/
-         False, si el equipo no existe en la bd """
-        return self.query.filter_by(nombre=self.nombre).scalar() != None
+    def to_json(self):
+        return {
+            "id":self.id,
+            "nombre":self.nombre,
+            "contacto":self.contacto,
+            "division":self.division,
+            "fechaIngreso":self.fecha_ingreso,
+            "entrenadorId":self.entrenador_id,
+            "jugadores": [jugador.jugador.nya for jugador in self.jugadores]
+        }
