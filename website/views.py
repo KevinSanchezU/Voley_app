@@ -36,22 +36,10 @@ def equipos():
     if request.method == "GET":
         equipos = Equipo.query.order_by(Equipo.nombre).all()
         if len(equipos) > 0:
-            for equipo in equipos:
-                print(f"Id del equipo: {equipo.id}")
-                print(f"Nombre de equipo: {equipo.nombre}")
-                print(f"Fecha de ingreso: {equipo.fecha_ingreso}")
-                print(f"Division: {equipo.division}")
-                print(f"DNI de entrenador: {equipo.entrenador_id}")
-                
-                for asociacionJugador in equipo.jugadores:
-                    print(f"Jugador: {asociacionJugador.jugador.nya}")
-                    print(f"Nro de camiseta: {asociacionJugador.nro_camiseta}")
-                    print(f"Posicion: {asociacionJugador.posicion}")
-                    print()
+            return {"equipos": [equipo.to_json() for equipo in equipos]},200
         else:
-            return jsonify({"Mensaje":"No hay equipos"})
-
-        return jsonify({"Mensaje":"201"})
+            return jsonify({"Mensaje":"No hay equipos"}),204
+        
     elif request.method == "POST":
         #Levantar valores del front
         nombre = request.form.get("nombre")
@@ -109,16 +97,9 @@ def jugadores():
     if request.method == "GET":
         jugadores = Jugador.query.order_by(Jugador.dni).all()
         if len(jugadores) > 0:
-            for jugador in jugadores:
-                print(f"Nombre del jugador: {jugador.nya}")
-                print(f"DNI del jugador: {jugador.dni}")
-                print(f"Fecha de nacimiento: {jugador.fecha_nac}")
-                print(f"Juega en: {jugador.equipos}")
-                print(f"Entrenador en: {jugador.equipo_dirigido}")
-
+            return {"jugadores": [jugador.to_json() for jugador in jugadores]},200
         else:
-            print("No hay jugadores")
-        return "<h1>Todos los jugadores!</h1>"
+            return {"mensaje":"No hay jugadores"},204
 
     elif request.method == "POST":
         #Levantando info del jugador del front
@@ -169,3 +150,8 @@ def eliminar_jugador(dni):
     except Exception as e:
         return jsonify({"mensaje":str(e)}),500
     return jsonify({"mensaje":"Jugador eliminado correctamente"})
+
+@views.route("/ver_asociaciones",methods=["GET"])
+def ver_asociaciones():
+    asociaciones = JugadorEquipo.query.order_by(JugadorEquipo.id_equipo).all()
+    return {"asociaciones":[asociacion.to_json() for asociacion in asociaciones]},200
