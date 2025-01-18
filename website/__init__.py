@@ -14,7 +14,7 @@ def crear_app():
 
     from .views import views
 
-    app.register_blueprint(views,url_prefix="/")
+    app.register_blueprint(views,url_prefix="/api")
     
     from .models import Equipo,Jugador,JugadorEquipo
 
