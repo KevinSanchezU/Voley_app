@@ -10,7 +10,7 @@ class JugadorEquipo(db.Model):
     categoria = db.Column(db.Enum('Sub-18', 'Sub-21', 'Mayores segunda', 'Mayores primera', name='categoria_enum', create_type=False),nullable=False)
 
     nro_camiseta = db.Column(db.Integer,nullable=False)
-    posicion = db.Column(db.Enum('Punta', 'Central' 'Libero', 'Armador', 'Opuesto', name='posicion_enum', create_type=False))
+    posicion = db.Column(db.Enum('Punta', 'Central', 'Libero', 'Armador', 'Opuesto', name='posicion_enum', create_type=False))
 
     jugador = db.relationship("Jugador", back_populates="equipos")
     equipo = db.relationship("Equipo", back_populates="jugadores")
@@ -33,9 +33,9 @@ class Jugador(db.Model):
     dni = db.Column(db.Integer, primary_key=True)
     nya = db.Column(db.String(45), nullable=False)
     sexo = db.Column(db.Enum('M','F', name="sexo_enum", create_type=False), nullable=False)
-    telefono = db.Column(db.String(15), nullable=True, default="0")
+    telefono = db.Column(db.String(15), nullable=True, default=None)
     fecha_nac = db.Column(db.Date, nullable=False)
-    direccion = db.Column(db.String(75),nullable=True, default="")
+    direccion = db.Column(db.String(75),nullable=True, default=None)
     #Relacion uno a uno
     equipo_dirigido = db.relationship('Equipo', backref='jugador', uselist=False)
     # Relacion muchos a muchos
@@ -62,7 +62,7 @@ class Equipo(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(45))
-    contacto = db.Column(db.String(60),nullable=True, default="")
+    contacto = db.Column(db.String(60),nullable=True, default=None)
     division = db.Column(db.Enum('M','F', name="division_enum", create_type=False), nullable=False)
     fecha_ingreso = db.Column(db.Date,nullable=False)
     #Relacion uno a uno

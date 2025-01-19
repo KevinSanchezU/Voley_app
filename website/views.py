@@ -34,7 +34,7 @@ def home():
 def equipos():
     #funcion que muestra todos los equipos
     if request.method == "GET":
-        equipos = Equipo.query.order_by(Equipo.nombre).all()
+        equipos = Equipo.query.all()
         if len(equipos) > 0:
             return {"equipos": [equipo.to_json() for equipo in equipos]},200
         else:
@@ -42,17 +42,16 @@ def equipos():
         
     elif request.method == "POST":
         #Levantar valores del front
-        nombre = request.form.get("nombre")
-        contacto = request.form.get("contacto")
-        division = request.form.get("division")
-        fecha_ingreso = date.fromisoformat(request.form.get("fecha_ingreso")) #convertir string en un objeto date
-        entrenador_id = request.form.get("entrenador")
+        data = request.json
+        nombre = data.get("nombre")
+        contacto = data.get("contacto")
+        division = data.get("division")
+        fecha_ingreso = date.fromisoformat(data.get("fechaIngreso")) #convertir string en un objeto date
+        entrenador_id = data.get("entrenador")
 
         #Validar valores
         if validar_division_equipo(division) and validar_nombre(nombre) and validar_fecha(fecha_ingreso):
             #agregar equipo a la bd
-            if entrenador_id is not None:
-                print("buscando entrenador en la bd")
             nuevo_equipo = Equipo(nombre=nombre, fecha_ingreso=fecha_ingreso,contacto=contacto, division=division,entrenador_id=entrenador_id)
             try:
                 db.session.add(nuevo_equipo)
@@ -60,25 +59,29 @@ def equipos():
             except exc.IntegrityError as e:
                 db.session.rollback()
                 return f"Error: {e}"
-            return jsonify({"Mensaje": f"Agregado {nombre} correctamente"})
+            return nuevo_equipo.to_json(),200
         else:
-            return "ERROR EN LOS PARAMETROS"
+            return jsonify({"mensaje": "Error en los parametros"})
     else: # metodo PUT
-        nombre = request.form.get("nombre")
-        dni = request.form.get("dni")
-        division = request.form.get("division")
-        nro_camiseta = request.form.get("nro_camiseta")
-        posicion = request.form.get("posicion")
+        data = request.json
+        nombre = data.get("nombre")
+        dni = data.get("dni")
+        division = data.get("division")
+        nro_camiseta = data.get("nroCamiseta")
+        posicion = data.get("posicion")
+        categoria = data.get("categoria")
 
         jugador = Jugador.query.filter_by(dni=dni).first()
         equipo = Equipo.query.filter_by(nombre=nombre,division=division).first()
-        asociacion = JugadorEquipo(dni_jugador=jugador.dni, id_equipo=equipo.id,categoria="Mayores segunda", nro_camiseta=nro_camiseta,posicion=posicion)
+        if jugador is None or equipo is None:
+            return {"mensaje":"Equipo o jugador no existen"}
+        asociacion = JugadorEquipo(dni_jugador=jugador.dni, id_equipo=equipo.id,categoria=categoria, nro_camiseta=nro_camiseta,posicion=posicion)
         db.session.add(asociacion)
         try:
             db.session.commit()
         except exc.IntegrityError as e:
             return f"{e}"
-        return jsonify({"mensaje":"Equipo cambiado con exito"})
+        return asociacion.to_json(),200
     
 @views.route("/eliminar_equipo/<int:id>", methods=["DELETE"])
 def eliminar_equipo(id):
@@ -103,12 +106,13 @@ def jugadores():
 
     elif request.method == "POST":
         #Levantando info del jugador del front
-        dni = request.form.get("dni")
-        nya = request.form.get("nya")
-        sexo = request.form.get("sexo")
-        telefono = request.form.get("telefono")
-        fecha_nac = date.fromisoformat(request.form.get("fecha_nac"))
-        direccion = request.form.get("direccion")
+        data = request.json
+        dni = data.get("dni")
+        nya = data.get("nya")
+        sexo = data.get("sexo")
+        telefono = data.get("telefono")
+        fecha_nac = date.fromisoformat(data.get("fechaNac"))
+        direccion = data.get("direccion")
         #creacion de jugador
         nuevo_jugador = Jugador(dni=dni,nya=nya,sexo=sexo,telefono=telefono,fecha_nac=fecha_nac,direccion=direccion)
         
@@ -120,7 +124,7 @@ def jugadores():
             return f"Error: {e}"
         return jsonify({"Mensaje": f"Agregado {nya} correctamente"})
 
-    else: #method PUT, agregando equipos dirigidos y a que equipo pertenece
+    else: #method PUT, agrega equipo dirigido, REVISAR que tan necesario es
         dni = request.form.get("dni")
         equipo_a_dirigir_form = request.form.get("equipo_a_dirigir")
         equipo_donde_juega_form = request.form.get("equipo_donde_juega")
