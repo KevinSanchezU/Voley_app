@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, jsonify
+from flask import Blueprint, request, jsonify
 from sqlalchemy import exc
 from .models import Equipo, Jugador, JugadorEquipo
 from datetime import date
@@ -24,7 +24,7 @@ def validar_fecha(fecha):
 def validar_jugador(jugador):
     if len(jugador.dni) < 7:
         return False
-    #Validar telefono?
+    #Validar telefono
     return True
 
 @views.route("/")
