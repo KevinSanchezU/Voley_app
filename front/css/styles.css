@@ -1,0 +1,136 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+header{
+    display: flex;
+    width: 90vw;
+    background-color: rgb(213, 213, 214);
+    margin: 0 auto;
+    align-items: center;
+
+}
+
+.logo-ruta{
+    border-radius: 110px;
+    width: 200px;
+    padding: 10px;
+}
+
+li{
+    list-style: none;
+}
+
+a{
+    text-decoration: none;
+    color: rgb(82, 81, 81);
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+a:hover{
+    color: rgb(55, 55, 255);
+}
+
+main{
+    background-color: aqua;
+    width: 90vw;
+    margin: 0 auto;
+}
+
+h2{
+    font-size: 1.5em;
+    padding: 10px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+.categoria{
+    max-width: 130px;
+    max-height: 200px;
+    background-color: rgb(224, 191, 101);
+    margin: 15px;
+    border-top-left-radius: 15px;
+    border-bottom-left-radius: 15px;
+}
+
+.categoria:nth-child(1){
+    writing-mode: vertical-lr;
+}
+
+.grupos{
+    width: 1570px;
+    background-color: rgb(125, 189, 189);
+    margin: 15px 0;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    display: flex;
+}
+
+.row{
+    margin-left: 5px;
+}
+
+.tarjeta{
+    width: 150px;
+    background-color: rgb(28, 119, 204);
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    border-radius: 5px;
+    margin: 5px;
+}
+.logo-grupo{
+    width: 100px;
+}
+
+h3{
+    padding-top: 5px ;
+}
+
+.modal-inscripcion{
+    background-color: rgba(0, 0, 0, 0.849);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+.modal-container{
+    margin: auto;
+    background-color: aliceblue;
+    width: 60%;
+    height: 70%;
+    max-height: 70%;
+    position: relative;
+    border-radius: 15px;
+}
+
+.modal-off{
+    margin: 10px;
+    left: 95%;
+    position: absolute;
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    background-color: red;
+    font-weight: bold;
+}
+
+.modal-show{
+    opacity: 1;
+    pointer-events: unset;
+}
+
+.form{
+    margin: 10px;
+}
