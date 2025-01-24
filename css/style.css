@@ -130,3 +130,7 @@ h3{
     opacity: 1;
     pointer-events: unset;
 }
+
+.form{
+    margin: 10px;
+}
