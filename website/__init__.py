@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from os import path
 
 db = SQLAlchemy()
@@ -7,6 +8,7 @@ DB_NAME = "voley_app_database.db"
 
 def crear_app():
     app = Flask(__name__)
+    CORS(app)
     
     app.config["SECRET_KEY"] = "this is a secret key, pero en espaniol"
     app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{DB_NAME}"
